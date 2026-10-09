@@ -1,0 +1,91 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isValidDate(dateStr) {
+      return dateStr is string && dateStr.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$');
+    }
+
+    function isValidPhone(phoneStr) {
+      return phoneStr is string && phoneStr.size() >= 10 && phoneStr.size() <= 13 && phoneStr.matches('^08[0-9]+$');
+    }
+
+    function isValidEmail(emailStr) {
+      return emailStr is string && emailStr.size() <= 80 && emailStr.matches('^.+@.+$');
+    }
+
+    // Koleksi Event
+    match /event/{eventId} {
+      allow read: if true;
+      
+      allow create: if request.resource.data.nama is string 
+                    && request.resource.data.nama.size() >= 1 && request.resource.data.nama.size() <= 60
+                    && request.resource.data.lokasi is string 
+                    && request.resource.data.lokasi.size() >= 1 && request.resource.data.lokasi.size() <= 100
+                    && isValidDate(request.resource.data.tanggal)
+                    && request.resource.data.harga_tiket is int && request.resource.data.harga_tiket >= 0
+                    && request.resource.data.kuota is int && request.resource.data.kuota >= 1 && request.resource.data.kuota <= 500
+                    && request.resource.data.tiket_terjual is int && request.resource.data.tiket_terjual == 0;
+                    
+      allow update: if request.resource.data.nama is string 
+                    && request.resource.data.nama.size() >= 1 && request.resource.data.nama.size() <= 60
+                    && request.resource.data.lokasi is string 
+                    && request.resource.data.lokasi.size() >= 1 && request.resource.data.lokasi.size() <= 100
+                    && isValidDate(request.resource.data.tanggal)
+                    && request.resource.data.harga_tiket is int && request.resource.data.harga_tiket >= 0
+                    && request.resource.data.kuota is int && request.resource.data.kuota >= 1 && request.resource.data.kuota <= 500
+                    && request.resource.data.tiket_terjual is int && request.resource.data.tiket_terjual >= 0
+                    && request.resource.data.tiket_terjual <= request.resource.data.kuota;
+                    
+      allow delete: if true;
+    }
+
+    // Koleksi Pembeli
+    match /pembeli/{noWhatsapp} {
+      allow read: if true;
+      
+      allow create: if request.resource.data.nama is string 
+                    && request.resource.data.nama.size() >= 1 && request.resource.data.nama.size() <= 60
+                    && request.resource.data.no_whatsapp == noWhatsapp
+                    && isValidPhone(request.resource.data.no_whatsapp)
+                    && isValidEmail(request.resource.data.email);
+                    
+      allow update: if request.resource.data.nama is string 
+                    && request.resource.data.nama.size() >= 1 && request.resource.data.nama.size() <= 60
+                    && request.resource.data.no_whatsapp == noWhatsapp
+                    && isValidPhone(request.resource.data.no_whatsapp)
+                    && isValidEmail(request.resource.data.email);
+                    
+      allow delete: if true;
+    }
+
+    // Koleksi Tiket
+    match /tiket/{tiketId} {
+      allow read: if true;
+      
+      allow create: if request.resource.data.event_id is string && request.resource.data.event_id.size() >= 1
+                    && request.resource.data.nama_event is string && request.resource.data.nama_event.size() >= 1
+                    && isValidDate(request.resource.data.tanggal_event)
+                    && request.resource.data.pembeli_id is string && request.resource.data.pembeli_id.size() >= 10
+                    && request.resource.data.nama_pembeli is string && request.resource.data.nama_pembeli.size() >= 1
+                    && request.resource.data.harga_tiket is int && request.resource.data.harga_tiket >= 0
+                    && request.resource.data.jumlah_tiket is int && request.resource.data.jumlah_tiket >= 1 && request.resource.data.jumlah_tiket <= 5
+                    && request.resource.data.total is int && request.resource.data.total == (request.resource.data.harga_tiket * request.resource.data.jumlah_tiket)
+                    && request.resource.data.status == 'menunggu_bayar';
+                    
+      allow update: if request.resource.data.event_id == resource.data.event_id
+                    && request.resource.data.pembeli_id == resource.data.pembeli_id
+                    && request.resource.data.jumlah_tiket == resource.data.jumlah_tiket
+                    && request.resource.data.harga_tiket == resource.data.harga_tiket
+                    && request.resource.data.total == resource.data.total
+                    && (
+                      (resource.data.status == 'menunggu_bayar' && request.resource.data.status in ['lunas', 'dibatalkan']) ||
+                      (resource.data.status == 'lunas' && request.resource.data.status == 'hadir')
+                    );
+                    
+      allow delete: if true;
+    }
+  }
+}
