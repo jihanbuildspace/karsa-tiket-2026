@@ -11,7 +11,9 @@ import {
   Check, 
   AlertCircle,
   MessageCircle,
-  ExternalLink
+  ExternalLink,
+  ShieldCheck,
+  UserCheck
 } from 'lucide-react';
 import { pembeliService } from '../services/pembeliService';
 import { LoadingState, EmptyState, ErrorState } from '../components/StateFeedback';
@@ -141,7 +143,6 @@ export const PembeliPage = ({ onDataChange }) => {
     }
   };
 
-  // Filter pembeli based on search
   const filteredList = useMemo(() => {
     if (!searchTerm.trim()) return pembeliList;
     const term = searchTerm.toLowerCase().trim();
@@ -152,13 +153,12 @@ export const PembeliPage = ({ onDataChange }) => {
     });
   }, [pembeliList, searchTerm]);
 
-  // Gradient colors for avatars
   const avatarGradients = [
-    'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    'linear-gradient(135deg, #6366f1, #a855f7)',
     'linear-gradient(135deg, #ec4899, #f43f5e)',
     'linear-gradient(135deg, #06b6d4, #3b82f6)',
     'linear-gradient(135deg, #10b981, #059669)',
-    'linear-gradient(135deg, #f59e0b, #d97706)'
+    'linear-gradient(135deg, #f59e0b, #ea580c)'
   ];
 
   return (
@@ -166,9 +166,10 @@ export const PembeliPage = ({ onDataChange }) => {
       <div className="page-header">
         <div className="page-title-wrap">
           <h1>
+            <Users size={26} color="#06b6d4" />
             <span>Buku Kontak Pembeli</span>
           </h1>
-          <p>Kelola data kontak peserta, verifikasi nomor WhatsApp, dan riwayat pesanan.</p>
+          <p>Kelola data kontak peserta, verifikasi nomor WhatsApp, dan riwayat pesanan tiket.</p>
         </div>
         <button id="btn-tambah-pembeli" type="button" className="btn btn-primary" onClick={handleOpenAdd}>
           <Plus size={18} />
@@ -176,9 +177,9 @@ export const PembeliPage = ({ onDataChange }) => {
         </button>
       </div>
 
-      {/* Modern Search Input */}
+      {/* Futuristic Search Input */}
       <div className="search-box">
-        <Search size={20} className="search-icon" />
+        <Search size={20} className="search-icon" color="#a855f7" />
         <input
           id="input-cari-pembeli"
           type="text"
@@ -194,7 +195,7 @@ export const PembeliPage = ({ onDataChange }) => {
             onClick={() => setSearchTerm('')}
             title="Bersihkan pencarian"
           >
-            <X size={18} />
+            <X size={18} color="var(--text-muted)" />
           </button>
         )}
       </div>
@@ -231,12 +232,12 @@ export const PembeliPage = ({ onDataChange }) => {
             const waUrl = `https://wa.me/62${phone.replace(/^0+/, '')}`;
 
             return (
-              <div key={phone} className="card" id={`card-pembeli-${phone}`} style={{ borderRadius: 'var(--radius-xl)' }}>
+              <div key={phone} className="card" id={`card-pembeli-${phone}`}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     <div style={{
-                      width: 46,
-                      height: 46,
+                      width: 48,
+                      height: 48,
                       borderRadius: '50%',
                       background: gradient,
                       color: 'white',
@@ -244,13 +245,14 @@ export const PembeliPage = ({ onDataChange }) => {
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 800,
-                      fontSize: '1.15rem',
-                      boxShadow: '0 4px 10px rgba(0,0,0,0.12)'
+                      fontSize: '1.2rem',
+                      boxShadow: '0 0 15px rgba(168, 85, 247, 0.35)',
+                      border: '2px solid rgba(255, 255, 255, 0.2)'
                     }}>
                       {(pembeli.nama || 'P').charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-title)', margin: 0 }}>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'white', margin: 0 }}>
                         {pembeli.nama}
                       </h3>
                       <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
@@ -264,10 +266,10 @@ export const PembeliPage = ({ onDataChange }) => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-secondary btn-icon-only"
-                    style={{ background: '#ecfdf5', color: '#059669', borderColor: '#a7f3d0' }}
+                    style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderColor: 'rgba(16, 185, 129, 0.4)' }}
                     title="Buka Chat WhatsApp"
                   >
-                    <MessageCircle size={16} />
+                    <MessageCircle size={17} />
                   </a>
                 </div>
 
@@ -276,19 +278,19 @@ export const PembeliPage = ({ onDataChange }) => {
                   flexDirection: 'column',
                   gap: 8,
                   margin: '16px 0 14px',
-                  background: 'var(--bg-subtle)',
+                  background: 'rgba(15, 23, 42, 0.7)',
                   padding: '12px 14px',
                   borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-light)'
+                  border: '1px solid var(--border-glass)'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem' }}>
-                    <Phone size={15} color="var(--primary)" />
-                    <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-title)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.86rem' }}>
+                    <Phone size={15} color="#38bdf8" />
+                    <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'white' }}>
                       {phone}
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                    <Mail size={15} color="var(--primary)" />
+                    <Mail size={15} color="#ec4899" />
                     <span style={{ wordBreak: 'break-all' }}>{pembeli.email}</span>
                   </div>
                 </div>
@@ -297,12 +299,12 @@ export const PembeliPage = ({ onDataChange }) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderTop: '1px solid var(--border-light)',
+                  borderTop: '1px solid var(--border-glass)',
                   paddingTop: 14,
                   marginTop: 'auto'
                 }}>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
-                    Terdaftar di sistem
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-dim)' }}>
+                    Verified Buyer
                   </span>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button

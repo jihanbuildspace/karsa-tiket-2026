@@ -11,7 +11,9 @@ import {
   Clock, 
   Tag,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Flame,
+  Zap
 } from 'lucide-react';
 import { eventService } from '../services/eventService';
 import { LoadingState, EmptyState, ErrorState } from '../components/StateFeedback';
@@ -171,14 +173,21 @@ export const EventPage = ({ onDataChange }) => {
     }
   };
 
+  const eventCardGradients = [
+    'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%)',
+    'linear-gradient(135deg, rgba(236, 72, 153, 0.25) 0%, rgba(244, 63, 94, 0.25) 100%)',
+    'linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(59, 130, 246, 0.25) 100%)'
+  ];
+
   return (
     <div>
       <div className="page-header">
         <div className="page-title-wrap">
           <h1>
-            <span>Jadwal Event Komunitas</span>
+            <Flame size={26} color="#ec4899" />
+            <span>Event & Workshop Komunitas</span>
           </h1>
-          <p>Kelola acara workshop, konser mini, lokasi, harga tiket, dan pantau kuota kursi.</p>
+          <p>Kelola jadwal acara, venue lokasi, kuota kursi, dan pantau penjualan tiket.</p>
         </div>
         <button id="btn-tambah-event" type="button" className="btn btn-primary" onClick={handleOpenAdd}>
           <Plus size={18} />
@@ -203,49 +212,67 @@ export const EventPage = ({ onDataChange }) => {
 
       {!loading && !error && events.length > 0 && (
         <div className="card-grid">
-          {events.map((event) => {
+          {events.map((event, idx) => {
             const terjual = event.tiket_terjual || 0;
             const kuota = event.kuota || 0;
             const sisaKuota = Math.max(0, kuota - terjual);
             const isHabis = terjual >= kuota;
             const percentage = kuota > 0 ? Math.min(100, Math.round((terjual / kuota) * 100)) : 0;
             const { day, month } = parseDateBox(event.tanggal);
+            const cardBg = eventCardGradients[idx % eventCardGradients.length];
 
             return (
               <div key={event.id} className="card-event" id={`card-event-${event.id}`}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, marginBottom: 14 }}>
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flex: 1 }}>
-                    <div className="event-date-box">
-                      <span className="event-date-day">{day}</span>
-                      <span className="event-date-month">{month}</span>
-                    </div>
-                    <div>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-title)', lineHeight: 1.3, marginBottom: 4 }}>
-                        {event.nama}
-                      </h3>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                        <MapPin size={14} color="var(--primary)" />
-                        <span>{event.lokasi}</span>
-                      </div>
-                    </div>
+                {/* Visual Header Banner */}
+                <div style={{
+                  background: cardBg,
+                  margin: '-22px -22px 16px -22px',
+                  padding: '16px 20px',
+                  borderBottom: '1px solid var(--border-glass)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Zap size={16} color="#fbbf24" />
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.05em' }}>
+                      OFFICIAL EVENT #{event.id}
+                    </span>
                   </div>
                   <span className={`badge ${isHabis ? 'badge-habis' : (event.harga_tiket === 0 ? 'badge-gratis' : 'badge-tersedia')}`}>
-                    {isHabis ? '● Habis' : (event.harga_tiket === 0 ? '★ Gratis' : '✓ Tersedia')}
+                    {isHabis ? '⛔ Habis' : (event.harga_tiket === 0 ? '✨ Gratis' : '⚡ Tersedia')}
                   </span>
                 </div>
 
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 14 }}>
+                  <div className="event-date-box">
+                    <span className="event-date-day">{day}</span>
+                    <span className="event-date-month">{month}</span>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', lineHeight: 1.3, marginBottom: 6 }}>
+                      {event.nama}
+                    </h3>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.84rem', color: 'var(--text-muted)' }}>
+                      <MapPin size={15} color="#ec4899" />
+                      <span>{event.lokasi}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Capacity Occupancy Box */}
                 <div style={{
-                  background: 'var(--bg-subtle)',
-                  padding: '12px 14px',
-                  borderRadius: 'var(--radius-md)',
-                  margin: '6px 0 14px',
-                  border: '1px solid var(--border-light)'
+                  background: 'rgba(15, 23, 42, 0.7)',
+                  padding: '14px 16px',
+                  borderRadius: 'var(--radius-lg)',
+                  margin: '6px 0 16px',
+                  border: '1px solid var(--border-glass)'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-body)' }}>
-                      Kapasitas Kursi
+                    <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#e2e8f0' }}>
+                      Kapasitas Kursi Terisi
                     </span>
-                    <span style={{ fontSize: '0.82rem', fontWeight: 700, color: isHabis ? '#ef4444' : 'var(--primary)' }}>
+                    <span style={{ fontSize: '0.84rem', fontWeight: 800, color: isHabis ? '#f43f5e' : '#a855f7' }}>
                       {terjual} / {kuota} ({percentage}%)
                     </span>
                   </div>
@@ -255,9 +282,9 @@ export const EventPage = ({ onDataChange }) => {
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                    <span>Sisa kuota: <strong style={{ color: isHabis ? '#ef4444' : 'var(--text-title)' }}>{sisaKuota} kursi</strong></span>
-                    <span style={{ fontWeight: 800, color: event.harga_tiket === 0 ? '#16a34a' : 'var(--primary)', fontSize: '0.85rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 6 }}>
+                    <span>Sisa kuota: <strong style={{ color: isHabis ? '#f43f5e' : '#34d399', fontSize: '0.85rem' }}>{sisaKuota} kursi</strong></span>
+                    <span style={{ fontWeight: 800, color: event.harga_tiket === 0 ? '#34d399' : '#38bdf8', fontSize: '0.95rem' }}>
                       {formatRupiah(event.harga_tiket)}
                     </span>
                   </div>
@@ -267,12 +294,12 @@ export const EventPage = ({ onDataChange }) => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  borderTop: '1px solid var(--border-light)',
+                  borderTop: '1px solid var(--border-glass)',
                   paddingTop: 14,
                   marginTop: 'auto'
                 }}>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--text-subtle)', fontFamily: 'monospace' }}>
-                    #{event.id}
+                  <span style={{ fontSize: '0.74rem', color: 'var(--text-dim)', fontFamily: 'monospace' }}>
+                    {event.tanggal}
                   </span>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button
@@ -399,16 +426,17 @@ export const EventPage = ({ onDataChange }) => {
                   <div style={{
                     padding: 12,
                     borderRadius: 'var(--radius-md)',
-                    background: 'var(--primary-light)',
-                    color: 'var(--primary-dark)',
-                    fontSize: '0.8rem',
+                    background: 'rgba(99, 102, 241, 0.15)',
+                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                    color: '#c4b5fd',
+                    fontSize: '0.82rem',
                     fontWeight: 500,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8
                   }}>
                     <Users size={16} />
-                    <span>Tiket terjual: <strong>{editingEvent.tiket_terjual || 0} kursi</strong>. Kuota baru tidak boleh lebih kecil dari angka ini.</span>
+                    <span>Tiket terjual: <strong>{editingEvent.tiket_terjual || 0} kursi</strong>. Kuota baru tidak boleh kurang dari angka ini.</span>
                   </div>
                 )}
               </div>

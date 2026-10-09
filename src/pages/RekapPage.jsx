@@ -10,7 +10,8 @@ import {
   Ticket,
   ChevronDown,
   Sparkles,
-  Percent
+  Percent,
+  Award
 } from 'lucide-react';
 import { eventService } from '../services/eventService';
 import { tiketService } from '../services/tiketService';
@@ -106,10 +107,10 @@ export const RekapPage = () => {
 
   const getStatusBadge = (status) => {
     const map = {
-      menunggu_bayar: { label: 'Menunggu Bayar', class: 'menunggu_bayar' },
-      lunas: { label: 'Lunas', class: 'lunas' },
-      hadir: { label: 'Hadir', class: 'hadir' },
-      dibatalkan: { label: 'Dibatalkan', class: 'dibatalkan' }
+      menunggu_bayar: { label: '⏳ Menunggu Bayar', class: 'menunggu_bayar' },
+      lunas: { label: '💳 Lunas', class: 'lunas' },
+      hadir: { label: '🎟️ Hadir', class: 'hadir' },
+      dibatalkan: { label: '✕ Dibatalkan', class: 'dibatalkan' }
     };
     const info = map[status] || { label: status, class: '' };
     return <span className={`status-pill ${info.class}`}>{info.label}</span>;
@@ -120,6 +121,7 @@ export const RekapPage = () => {
       <div className="page-header">
         <div className="page-title-wrap">
           <h1>
+            <BarChart3 size={26} color="#ec4899" />
             <span>Rekapitulasi Penjualan & Kehadiran</span>
           </h1>
           <p>Laporan pendapatan riil (Lunas & Hadir), sisa kuota kursi, dan rekapitulasi kehadiran.</p>
@@ -142,20 +144,23 @@ export const RekapPage = () => {
       {!loading && !error && events.length > 0 && (
         <div>
           {/* Event Selector Dropdown Card */}
-          <div className="card" style={{ marginBottom: 22, padding: 20, borderRadius: 'var(--radius-xl)' }}>
-            <label className="form-label" style={{ marginBottom: 8, fontSize: '0.9rem' }}>
-              <span>Pilih Acara / Event untuk Ditampilkan:</span>
+          <div className="card" style={{ marginBottom: 24, padding: 22 }}>
+            <label className="form-label" style={{ marginBottom: 10, fontSize: '0.92rem' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Sparkles size={16} color="#fbbf24" />
+                Pilih Acara / Event untuk Ditampilkan:
+              </span>
             </label>
             <select
               id="select-rekap-event"
               className="form-select"
               value={selectedEventId}
               onChange={(e) => setSelectedEventId(e.target.value)}
-              style={{ fontSize: '1rem', fontWeight: 700, padding: '14px 18px', height: 'auto' }}
+              style={{ fontSize: '1.05rem', fontWeight: 800, padding: '14px 20px', height: 'auto' }}
             >
               {events.map((ev) => (
                 <option key={ev.id} value={ev.id}>
-                  {ev.nama} ({ev.tanggal}) • {ev.harga_tiket === 0 ? 'Gratis' : formatRupiah(ev.harga_tiket)} [Terjual: {ev.tiket_terjual || 0}/{ev.kuota}]
+                  {ev.nama} ({ev.tanggal}) • {ev.harga_tiket === 0 ? 'Gratis' : formatRupiah(ev.harga_tiket)} [Terjual: {ev.tiket_terjual || 0}/{ev.kuota} Kursi]
                 </option>
               ))}
             </select>
@@ -163,87 +168,90 @@ export const RekapPage = () => {
 
           {selectedEvent && (
             <>
-              {/* Metric Cards Grid */}
+              {/* Glowing Metric Cards Grid */}
               <div className="metrics-grid">
                 {/* Tiket Terjual */}
-                <div className="metric-card">
-                  <div className="metric-icon-wrap" style={{ background: '#eef2ff', color: '#6366f1' }}>
+                <div className="metric-card" style={{ borderTop: '3px solid #a855f7' }}>
+                  <div className="metric-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.2)', color: '#d8b4fe' }}>
                     <Layers size={22} />
                   </div>
                   <span className="metric-label">Tiket Terjual</span>
-                  <div className="metric-value" style={{ color: 'var(--primary)' }}>
+                  <div className="metric-value" style={{ color: '#d8b4fe' }}>
                     {metrics.terjual}
                   </div>
-                  <span className="metric-sub">dari {metrics.kuota} total kursi</span>
+                  <span className="metric-sub">dari total {metrics.kuota} kursi</span>
                 </div>
 
                 {/* Sisa Kuota */}
-                <div className="metric-card">
-                  <div className="metric-icon-wrap" style={{ background: '#e0f2fe', color: '#0284c7' }}>
+                <div className="metric-card" style={{ borderTop: '3px solid #38bdf8' }}>
+                  <div className="metric-icon-wrap" style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8' }}>
                     <Ticket size={22} />
                   </div>
                   <span className="metric-label">Sisa Kuota</span>
-                  <div className="metric-value" style={{ color: metrics.sisa === 0 ? '#ef4444' : 'var(--text-title)' }}>
+                  <div className="metric-value" style={{ color: metrics.sisa === 0 ? '#f43f5e' : '#38bdf8' }}>
                     {metrics.sisa}
                   </div>
-                  <span className="metric-sub">{metrics.sisa === 0 ? 'Kuota Habis' : 'Kursi Tersedia'}</span>
+                  <span className="metric-sub">{metrics.sisa === 0 ? '⛔ Kuota Habis' : '⚡ Kursi Tersedia'}</span>
                 </div>
 
                 {/* Pendapatan Lunas + Hadir */}
-                <div className="metric-card">
-                  <div className="metric-icon-wrap" style={{ background: '#ecfdf5', color: '#059669' }}>
+                <div className="metric-card" style={{ borderTop: '3px solid #34d399' }}>
+                  <div className="metric-icon-wrap" style={{ background: 'rgba(52, 211, 153, 0.2)', color: '#34d399' }}>
                     <DollarSign size={22} />
                   </div>
                   <span className="metric-label">Pendapatan Riil</span>
-                  <div className="metric-value" style={{ color: '#059669', fontSize: '1.4rem' }}>
+                  <div className="metric-value" style={{ color: '#34d399', fontSize: '1.45rem' }}>
                     {formatRupiah(metrics.pendapatan)}
                   </div>
-                  <span className="metric-sub">Dari status Lunas & Hadir</span>
+                  <span className="metric-sub">Tiket Lunas & Hadir</span>
                 </div>
 
                 {/* Jumlah Hadir */}
-                <div className="metric-card">
-                  <div className="metric-icon-wrap" style={{ background: '#fdf4ff', color: '#c026d3' }}>
+                <div className="metric-card" style={{ borderTop: '3px solid #f472b6' }}>
+                  <div className="metric-icon-wrap" style={{ background: 'rgba(244, 114, 182, 0.2)', color: '#f472b6' }}>
                     <CheckCircle2 size={22} />
                   </div>
                   <span className="metric-label">Peserta Hadir</span>
-                  <div className="metric-value" style={{ color: '#c026d3' }}>
+                  <div className="metric-value" style={{ color: '#f472b6' }}>
                     {metrics.hadir}
                   </div>
-                  <span className="metric-sub">Sudah check-in di venue</span>
+                  <span className="metric-sub">Telah Check-in di Venue</span>
                 </div>
               </div>
 
               {/* Progress Bar Okupansi */}
-              <div className="card" style={{ marginBottom: 24, borderRadius: 'var(--radius-xl)', padding: 22 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div className="card" style={{ marginBottom: 26, padding: 24 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Percent size={18} color="var(--primary)" />
-                    <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-title)' }}>
+                    <Percent size={20} color="#a855f7" />
+                    <span style={{ fontSize: '1rem', fontWeight: 800, color: 'white' }}>
                       Tingkat Keterisian Kuota (Okupansi)
                     </span>
                   </div>
-                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)' }}>
+                  <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#38bdf8', textShadow: '0 0 12px rgba(56, 189, 248, 0.5)' }}>
                     {metrics.persentase}%
                   </span>
                 </div>
-                <div className="quota-bar-wrapper" style={{ height: 14 }}>
+                <div className="quota-bar-wrapper" style={{ height: 16 }}>
                   <div
                     className={`quota-bar-fill ${metrics.sisa === 0 ? 'full' : ''}`}
                     style={{ width: `${metrics.persentase}%` }}
                   />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 8 }}>
                   <span>0 Kursi Terisi</span>
-                  <span>Kapasitas Maksimal: <strong>{metrics.kuota} Kursi</strong></span>
+                  <span>Kapasitas Maksimal: <strong style={{ color: 'white' }}>{metrics.kuota} Kursi</strong></span>
                 </div>
               </div>
 
               {/* Tiket Breakdown List */}
-              <div style={{ marginTop: 26 }}>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-title)', marginBottom: 14 }}>
-                  Rincian Transaksi Tiket ({tickets.length} Pembelian)
-                </h3>
+              <div style={{ marginTop: 28 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'white', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Award size={20} color="#fbbf24" />
+                    Rincian Transaksi Tiket ({tickets.length} Pembelian)
+                  </h3>
+                </div>
 
                 {ticketsLoading && <LoadingState count={2} message="Memuat rincian transaksi..." />}
 
@@ -260,15 +268,15 @@ export const RekapPage = () => {
                       <div 
                         key={t.id} 
                         className="card" 
-                        style={{ padding: '16px 20px', borderRadius: 'var(--radius-lg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}
+                        style={{ padding: '16px 22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}
                       >
                         <div>
-                          <div style={{ fontWeight: 800, fontSize: '0.98rem', color: 'var(--text-title)' }}>{t.nama_pembeli}</div>
-                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                            {t.pembeli_id} • <strong>{t.jumlah_tiket} tiket</strong> ({formatRupiah(t.total)})
+                          <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'white' }}>{t.nama_pembeli}</div>
+                          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                            {t.pembeli_id} • <strong style={{ color: '#38bdf8' }}>{t.jumlah_tiket} tiket</strong> ({formatRupiah(t.total)})
                           </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                           {getStatusBadge(t.status)}
                         </div>
                       </div>

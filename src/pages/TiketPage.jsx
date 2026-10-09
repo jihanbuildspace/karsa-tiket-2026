@@ -5,7 +5,7 @@ import {
   User, 
   Plus, 
   Trash2, 
-  CheckCircle, 
+  CheckCircle2, 
   UserCheck, 
   Ban, 
   X, 
@@ -14,7 +14,9 @@ import {
   DollarSign,
   Layers,
   Sparkles,
-  QrCode
+  QrCode,
+  Zap,
+  Clock
 } from 'lucide-react';
 import { tiketService } from '../services/tiketService';
 import { eventService } from '../services/eventService';
@@ -141,7 +143,6 @@ export const TiketPage = ({ onDataChange }) => {
     }
   };
 
-  // Status Transitions
   const handleTriggerStatusChange = (tiket, targetStatus) => {
     if (targetStatus === 'lunas') {
       setStatusAction({
@@ -229,9 +230,10 @@ export const TiketPage = ({ onDataChange }) => {
       <div className="page-header">
         <div className="page-title-wrap">
           <h1>
+            <Ticket size={26} color="#a855f7" />
             <span>Daftar Tiket & Transaksi</span>
           </h1>
-          <p>Catat pesanan tiket, validasi pembayaran transfer, dan proses check-in peserta acara.</p>
+          <p>Catat pesanan tiket, validasi pembayaran transfer, dan proses check-in kehadiran peserta.</p>
         </div>
         <button id="btn-tambah-tiket" type="button" className="btn btn-primary" onClick={handleOpenAdd}>
           <Plus size={18} />
@@ -239,7 +241,7 @@ export const TiketPage = ({ onDataChange }) => {
         </button>
       </div>
 
-      {/* Filter Tabs */}
+      {/* Filter Tabs with Glowing Badges */}
       <div className="filter-tabs">
         <button
           type="button"
@@ -307,13 +309,17 @@ export const TiketPage = ({ onDataChange }) => {
           {filteredTickets.map((tiket) => {
             return (
               <div key={tiket.id} className="ticket-stub" id={`card-tiket-${tiket.id}`}>
+                {/* Holographic Header */}
                 <div className="ticket-stub-header">
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
                     <div>
-                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        KARSA EVENT PASS
-                      </span>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-title)', marginTop: 2 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Sparkles size={13} color="#ec4899" />
+                        <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#e0e7ff', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                          KARSA PASS #{tiket.id}
+                        </span>
+                      </div>
+                      <h3 style={{ fontSize: '1.18rem', fontWeight: 800, color: 'white', marginTop: 4 }}>
                         {tiket.nama_event}
                       </h3>
                     </div>
@@ -322,27 +328,28 @@ export const TiketPage = ({ onDataChange }) => {
                 </div>
 
                 <div className="ticket-stub-body">
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div style={{
-                        width: 32,
-                        height: 32,
+                        width: 38,
+                        height: 38,
                         borderRadius: '50%',
-                        background: 'var(--primary-light)',
-                        color: 'var(--primary)',
+                        background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                        color: 'white',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontWeight: 700,
-                        fontSize: '0.85rem'
+                        fontWeight: 800,
+                        fontSize: '0.9rem',
+                        boxShadow: '0 0 10px rgba(168, 85, 247, 0.4)'
                       }}>
-                        <User size={16} />
+                        <User size={18} />
                       </div>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-title)' }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.96rem', color: 'white' }}>
                           {tiket.nama_pembeli}
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
                           {tiket.pembeli_id}
                         </div>
                       </div>
@@ -351,39 +358,39 @@ export const TiketPage = ({ onDataChange }) => {
                     <div style={{
                       display: 'grid',
                       gridTemplateColumns: '1fr 1fr',
-                      gap: 8,
-                      background: 'var(--bg-subtle)',
-                      padding: '10px 12px',
+                      gap: 10,
+                      background: 'rgba(15, 23, 42, 0.7)',
+                      padding: '12px 14px',
                       borderRadius: 'var(--radius-md)',
-                      border: '1px solid var(--border-light)'
+                      border: '1px solid var(--border-glass)'
                     }}>
                       <div>
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Tanggal Event</span>
-                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-title)' }}>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>Tanggal Acara</span>
+                        <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#e2e8f0' }}>
                           {tiket.tanggal_event}
                         </div>
                       </div>
                       <div>
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Kuantitas</span>
-                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-title)' }}>
-                          {tiket.jumlah_tiket} Tiket
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>Kuantitas Tiket</span>
+                        <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#38bdf8' }}>
+                          {tiket.jumlah_tiket} Kursi
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 4 }}>
-                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Total Pembayaran</span>
-                      <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 2 }}>
+                      <span style={{ fontSize: '0.84rem', color: 'var(--text-muted)', fontWeight: 600 }}>Total Pembayaran</span>
+                      <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#34d399', textShadow: '0 0 12px rgba(52, 211, 153, 0.4)' }}>
                         {formatRupiah(tiket.total)}
                       </span>
                     </div>
                   </div>
 
-                  {/* Status Action Buttons */}
+                  {/* Status Action Buttons with Glowing Styles */}
                   <div style={{
-                    marginTop: 14,
-                    paddingTop: 12,
-                    borderTop: '1px solid var(--border-light)'
+                    marginTop: 16,
+                    paddingTop: 14,
+                    borderTop: '1px solid var(--border-glass)'
                   }}>
                     {tiket.status === 'menunggu_bayar' && (
                       <div style={{ display: 'flex', gap: 8 }}>
@@ -393,7 +400,7 @@ export const TiketPage = ({ onDataChange }) => {
                           style={{ flex: 1 }}
                           onClick={() => handleTriggerStatusChange(tiket, 'lunas')}
                         >
-                          <CheckCircle size={15} />
+                          <CheckCircle2 size={16} />
                           <span>Konfirmasi Lunas</span>
                         </button>
                         <button
@@ -402,7 +409,7 @@ export const TiketPage = ({ onDataChange }) => {
                           onClick={() => handleTriggerStatusChange(tiket, 'dibatalkan')}
                           title="Batalkan Pesanan Tiket"
                         >
-                          <Ban size={15} />
+                          <Ban size={16} />
                           <span>Batalkan</span>
                         </button>
                       </div>
@@ -415,53 +422,59 @@ export const TiketPage = ({ onDataChange }) => {
                         style={{ width: '100%' }}
                         onClick={() => handleTriggerStatusChange(tiket, 'hadir')}
                       >
-                        <UserCheck size={16} />
+                        <UserCheck size={17} />
                         <span>Check-in (Tandai Hadir di Acara)</span>
                       </button>
                     )}
 
                     {tiket.status === 'hadir' && (
                       <div style={{
-                        padding: '8px 12px',
+                        padding: '10px 14px',
                         borderRadius: 'var(--radius-md)',
-                        background: '#ecfdf5',
-                        color: '#065f46',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        border: '1px solid rgba(16, 185, 129, 0.4)',
+                        color: '#34d399',
+                        fontSize: '0.82rem',
+                        fontWeight: 800,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 6
+                        gap: 8
                       }}>
-                        <CheckCircle size={16} />
-                        <span>Peserta Sudah Check-in di Venue</span>
+                        <CheckCircle2 size={17} />
+                        <span>Peserta Sudah Check-in di Lokasi</span>
                       </div>
                     )}
 
                     {tiket.status === 'dibatalkan' && (
                       <div style={{
-                        padding: '8px 12px',
+                        padding: '10px 14px',
                         borderRadius: 'var(--radius-md)',
-                        background: '#fef2f2',
-                        color: '#991b1b',
-                        fontSize: '0.8rem',
-                        fontWeight: 700,
+                        background: 'rgba(244, 63, 94, 0.15)',
+                        border: '1px solid rgba(244, 63, 94, 0.4)',
+                        color: '#fda4af',
+                        fontSize: '0.82rem',
+                        fontWeight: 800,
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 6
+                        gap: 8
                       }}>
-                        <Ban size={16} />
-                        <span>Pembelian Dibatalkan (Kuota Kembali)</span>
+                        <Ban size={17} />
+                        <span>Pembelian Dibatalkan (Kuota Dikembalikan)</span>
                       </div>
                     )}
                   </div>
                 </div>
 
+                {/* Ticket Stub Footer with Faux Barcode */}
                 <div className="ticket-stub-footer">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <QrCode size={16} color="var(--text-muted)" />
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-subtle)', fontFamily: 'monospace' }}>
-                      #{tiket.id}
-                    </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <QrCode size={18} color="#a855f7" />
+                    <div style={{
+                      height: 14,
+                      width: 65,
+                      background: 'repeating-linear-gradient(90deg, #94a3b8, #94a3b8 2px, transparent 2px, transparent 4px)',
+                      opacity: 0.6
+                    }} />
                   </div>
                   <button
                     type="button"
@@ -504,7 +517,7 @@ export const TiketPage = ({ onDataChange }) => {
                     Pilih Acara / Event <span className="hint">Pilih dari jadwal</span>
                   </label>
                   {events.length === 0 ? (
-                    <div style={{ color: 'var(--danger)', fontSize: '0.85rem' }}>
+                    <div style={{ color: '#f43f5e', fontSize: '0.85rem' }}>
                       Belum ada event tersedia. Silakan tambah event terlebih dahulu.
                     </div>
                   ) : (
@@ -533,7 +546,7 @@ export const TiketPage = ({ onDataChange }) => {
                     Pilih Kontak Pembeli <span className="hint">Nama & WhatsApp</span>
                   </label>
                   {pembeliList.length === 0 ? (
-                    <div style={{ color: 'var(--danger)', fontSize: '0.85rem' }}>
+                    <div style={{ color: '#f43f5e', fontSize: '0.85rem' }}>
                       Belum ada data pembeli. Silakan tambah pembeli terlebih dahulu.
                     </div>
                   ) : (
@@ -570,8 +583,8 @@ export const TiketPage = ({ onDataChange }) => {
                     onChange={(e) => setFormData({ ...formData, jumlah_tiket: e.target.value })}
                   />
                   {formErrors.jumlah_tiket && <span className="form-error"><AlertCircle size={13} /> {formErrors.jumlah_tiket}</span>}
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                    Sisa kuota event terpilih: <strong>{sisaKuotaSelected} kursi</strong>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Sisa kuota event terpilih: <strong style={{ color: '#34d399' }}>{sisaKuotaSelected} kursi</strong>
                   </span>
                 </div>
 
@@ -579,15 +592,15 @@ export const TiketPage = ({ onDataChange }) => {
                 <div style={{
                   padding: 16,
                   borderRadius: 'var(--radius-lg)',
-                  background: 'linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%)',
-                  border: '1px solid #c7d2fe',
+                  background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   marginTop: 12
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-body)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.86rem', color: '#e2e8f0' }}>
                     <span>Harga Satuan:</span>
                     <strong>{formatRupiah(selectedEvent ? selectedEvent.harga_tiket : 0)}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-body)', marginTop: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.86rem', color: '#e2e8f0', marginTop: 4 }}>
                     <span>Jumlah Tiket:</span>
                     <strong>{formData.jumlah_tiket} tiket</strong>
                   </div>
@@ -595,17 +608,17 @@ export const TiketPage = ({ onDataChange }) => {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    fontSize: '1.1rem',
+                    fontSize: '1.15rem',
                     fontWeight: 800,
-                    color: 'var(--primary)',
-                    borderTop: '1px dashed #a5b4fc',
+                    color: '#34d399',
+                    borderTop: '1px dashed rgba(255, 255, 255, 0.2)',
                     paddingTop: 10,
                     marginTop: 10
                   }}>
                     <span>Total Pembayaran:</span>
-                    <span style={{ fontSize: '1.25rem' }}>{formatRupiah(calculatedTotal)}</span>
+                    <span style={{ fontSize: '1.3rem' }}>{formatRupiah(calculatedTotal)}</span>
                   </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 6 }}>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 6 }}>
                     * Tiket baru otomatis diawali dengan status <strong>menunggu_bayar</strong>.
                   </div>
                 </div>
