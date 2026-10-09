@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Users, Ticket, BarChart3, Database, Sparkles } from 'lucide-react';
+import { Calendar, Users, Ticket, BarChart3, Sparkles } from 'lucide-react';
 import { isFirebaseLive } from '../firebase/config';
 
 export const Navbar = ({ 
@@ -21,13 +21,16 @@ export const Navbar = ({
   return (
     <header className="app-header">
       <div className="header-top">
-        <div className="brand-logo">
+        <div className="brand-logo" onClick={() => setActiveTab('event')}>
           <div className="brand-icon">
-            <Ticket size={22} strokeWidth={2.5} />
+            <Ticket size={24} strokeWidth={2.5} />
           </div>
           <div>
             <div className="brand-name">Karsa Tiket</div>
-            <div className="brand-tagline">Tiketing Event Komunitas</div>
+            <div className="brand-tagline">
+              <Sparkles size={13} color="var(--primary)" />
+              <span>Tiketing Komunitas Kreatif</span>
+            </div>
           </div>
         </div>
 
@@ -39,7 +42,7 @@ export const Navbar = ({
             title="Klik untuk mengatur Firebase atau Demo Mode"
           >
             <span className={`status-dot ${isFirebaseLive ? 'live' : 'demo'}`}></span>
-            <span>{isFirebaseLive ? 'Firestore Live' : 'Mode Demo'}</span>
+            <span>{isFirebaseLive ? '🔥 Firestore Live' : '⚡ Mode Demo'}</span>
           </button>
         </div>
       </div>
@@ -56,7 +59,7 @@ export const Navbar = ({
               className={`nav-item ${isActive ? 'active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
             >
-              <Icon size={18} />
+              <Icon size={17} strokeWidth={isActive ? 2.5 : 2} />
               <span>{tab.label}</span>
               {tab.count !== undefined && (
                 <span className="nav-badge">{tab.count}</span>

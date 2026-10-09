@@ -10,7 +10,8 @@ import {
   X, 
   Check, 
   AlertCircle,
-  UserCheck
+  MessageCircle,
+  ExternalLink
 } from 'lucide-react';
 import { pembeliService } from '../services/pembeliService';
 import { LoadingState, EmptyState, ErrorState } from '../components/StateFeedback';
@@ -151,27 +152,38 @@ export const PembeliPage = ({ onDataChange }) => {
     });
   }, [pembeliList, searchTerm]);
 
+  // Gradient colors for avatars
+  const avatarGradients = [
+    'linear-gradient(135deg, #6366f1, #8b5cf6)',
+    'linear-gradient(135deg, #ec4899, #f43f5e)',
+    'linear-gradient(135deg, #06b6d4, #3b82f6)',
+    'linear-gradient(135deg, #10b981, #059669)',
+    'linear-gradient(135deg, #f59e0b, #d97706)'
+  ];
+
   return (
     <div>
       <div className="page-header">
         <div className="page-title-wrap">
-          <h1>Data Pembeli</h1>
-          <p>Kelola kontak pembeli tiket berdasarkan nama dan nomor WhatsApp.</p>
+          <h1>
+            <span>Buku Kontak Pembeli</span>
+          </h1>
+          <p>Kelola data kontak peserta, verifikasi nomor WhatsApp, dan riwayat pesanan.</p>
         </div>
         <button id="btn-tambah-pembeli" type="button" className="btn btn-primary" onClick={handleOpenAdd}>
           <Plus size={18} />
-          <span>Tambah Pembeli</span>
+          <span>Tambah Pembeli Baru</span>
         </button>
       </div>
 
-      {/* Search Input */}
+      {/* Modern Search Input */}
       <div className="search-box">
-        <Search size={18} className="search-icon" />
+        <Search size={20} className="search-icon" />
         <input
           id="input-cari-pembeli"
           type="text"
           className="form-input"
-          placeholder="Cari pembeli berdasarkan nama atau nomor WhatsApp..."
+          placeholder="Cari berdasarkan nama lengkap atau nomor WhatsApp (08...)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -182,12 +194,12 @@ export const PembeliPage = ({ onDataChange }) => {
             onClick={() => setSearchTerm('')}
             title="Bersihkan pencarian"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
         )}
       </div>
 
-      {loading && <LoadingState message="Memuat daftar pembeli..." />}
+      {loading && <LoadingState message="Memuat kontak pembeli..." />}
 
       {!loading && error && (
         <ErrorState description={error} onRetry={fetchPembeli} />
@@ -196,8 +208,8 @@ export const PembeliPage = ({ onDataChange }) => {
       {!loading && !error && pembeliList.length === 0 && (
         <EmptyState
           title="Belum Ada Pembeli"
-          description="Belum ada data kontak pembeli yang tercatat di sistem."
-          actionLabel="Tambah Pembeli"
+          description="Belum ada data kontak pembeli yang tercatat di sistem. Tambahkan pembeli pertamamu sekarang!"
+          actionLabel="Tambah Pembeli Baru"
           onAction={handleOpenAdd}
         />
       )}
@@ -205,7 +217,7 @@ export const PembeliPage = ({ onDataChange }) => {
       {!loading && !error && pembeliList.length > 0 && filteredList.length === 0 && (
         <EmptyState
           title="Pembeli Tidak Ditemukan"
-          description={`Tidak ada data pembeli yang cocok dengan kata kunci "${searchTerm}".`}
+          description={`Tidak ditemukan data pembeli yang cocok dengan kata kunci "${searchTerm}".`}
           actionLabel="Reset Pencarian"
           onAction={() => setSearchTerm('')}
         />
@@ -213,53 +225,86 @@ export const PembeliPage = ({ onDataChange }) => {
 
       {!loading && !error && filteredList.length > 0 && (
         <div className="card-grid">
-          {filteredList.map((pembeli) => {
+          {filteredList.map((pembeli, idx) => {
             const phone = pembeli.no_whatsapp || pembeli.id;
+            const gradient = avatarGradients[idx % avatarGradients.length];
+            const waUrl = `https://wa.me/62${phone.replace(/^0+/, '')}`;
+
             return (
-              <div key={phone} className="card" id={`card-pembeli-${phone}`}>
-                <div className="card-header">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div key={phone} className="card" id={`card-pembeli-${phone}`} style={{ borderRadius: 'var(--radius-xl)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                     <div style={{
-                      width: 38,
-                      height: 38,
+                      width: 46,
+                      height: 46,
                       borderRadius: '50%',
-                      background: 'var(--primary-light)',
-                      color: 'var(--primary)',
+                      background: gradient,
+                      color: 'white',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontWeight: 700,
-                      fontSize: '0.95rem'
+                      fontWeight: 800,
+                      fontSize: '1.15rem',
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.12)'
                     }}>
                       {(pembeli.nama || 'P').charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h3 className="card-title" style={{ fontSize: '1rem', margin: 0 }}>{pembeli.nama}</h3>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                      <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-title)', margin: 0 }}>
+                        {pembeli.nama}
+                      </h3>
+                      <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                         ID: {phone}
                       </span>
                     </div>
                   </div>
+
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-secondary btn-icon-only"
+                    style={{ background: '#ecfdf5', color: '#059669', borderColor: '#a7f3d0' }}
+                    title="Buka Chat WhatsApp"
+                  >
+                    <MessageCircle size={16} />
+                  </a>
                 </div>
 
-                <div className="card-meta" style={{ marginTop: 12 }}>
-                  <div className="card-meta-item">
-                    <Phone size={15} className="text-muted" />
-                    <span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--text-main)' }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                  margin: '16px 0 14px',
+                  background: 'var(--bg-subtle)',
+                  padding: '12px 14px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-light)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem' }}>
+                    <Phone size={15} color="var(--primary)" />
+                    <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-title)' }}>
                       {phone}
                     </span>
                   </div>
-                  <div className="card-meta-item">
-                    <Mail size={15} className="text-muted" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                    <Mail size={15} color="var(--primary)" />
                     <span style={{ wordBreak: 'break-all' }}>{pembeli.email}</span>
                   </div>
                 </div>
 
-                <div className="card-footer">
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderTop: '1px solid var(--border-light)',
+                  paddingTop: 14,
+                  marginTop: 'auto'
+                }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
                     Terdaftar di sistem
                   </span>
-                  <div className="action-buttons">
+                  <div style={{ display: 'flex', gap: 8 }}>
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
@@ -291,7 +336,7 @@ export const PembeliPage = ({ onDataChange }) => {
         <div className="modal-overlay" onClick={() => !isSubmitting && setIsModalOpen(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editingPembeli ? 'Ubah Data Pembeli' : 'Tambah Pembeli Baru'}</h3>
+              <h3>{editingPembeli ? 'Ubah Data Pembeli' : 'Daftarkan Pembeli Baru'}</h3>
               <button
                 type="button"
                 className="btn-icon-only"
@@ -321,7 +366,7 @@ export const PembeliPage = ({ onDataChange }) => {
 
                 <div className="form-group">
                   <label className="form-label">
-                    Nomor WhatsApp <span className="hint">Diawali 08, 10-13 angka</span>
+                    Nomor WhatsApp <span className="hint">Diawali 08, 10-13 digit</span>
                   </label>
                   <input
                     type="text"
@@ -333,8 +378,8 @@ export const PembeliPage = ({ onDataChange }) => {
                     onChange={(e) => setFormData({ ...formData, no_whatsapp: e.target.value.replace(/\D/g, '') })}
                   />
                   {editingPembeli && (
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                      Nomor WhatsApp merupakan ID dokumen dan tidak dapat diubah.
+                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: 4 }}>
+                      Nomor WhatsApp merupakan ID dokumen utama di Firestore dan tidak dapat diubah.
                     </span>
                   )}
                   {formErrors.no_whatsapp && <span className="form-error"><AlertCircle size={13} /> {formErrors.no_whatsapp}</span>}
@@ -342,7 +387,7 @@ export const PembeliPage = ({ onDataChange }) => {
 
                 <div className="form-group">
                   <label className="form-label">
-                    Email <span className="hint">Harus mengandung @, maks 80 karakter</span>
+                    Alamat Email <span className="hint">Mengandung tanda @, maks 80 karakter</span>
                   </label>
                   <input
                     type="email"
@@ -382,9 +427,9 @@ export const PembeliPage = ({ onDataChange }) => {
       {/* Modal Konfirmasi Hapus */}
       <ConfirmModal
         isOpen={!!deleteTarget}
-        title="Hapus Pembeli"
-        message={`Apakah Anda yakin ingin menghapus data pembeli "${deleteTarget?.nama}" (${deleteTarget?.no_whatsapp || deleteTarget?.id})?`}
-        confirmLabel="Hapus Pembeli"
+        title="Hapus Data Pembeli"
+        message={`Apakah Anda yakin ingin menghapus data kontak "${deleteTarget?.nama}" (${deleteTarget?.no_whatsapp || deleteTarget?.id})?`}
+        confirmLabel="Ya, Hapus Pembeli"
         cancelLabel="Batal"
         isLoading={isDeleting}
         onConfirm={handleDeleteConfirm}

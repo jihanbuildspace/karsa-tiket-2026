@@ -12,7 +12,9 @@ import {
   Check, 
   AlertCircle, 
   DollarSign,
-  Layers
+  Layers,
+  Sparkles,
+  QrCode
 } from 'lucide-react';
 import { tiketService } from '../services/tiketService';
 import { eventService } from '../services/eventService';
@@ -43,7 +45,7 @@ export const TiketPage = ({ onDataChange }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Status Action Modal State
-  const [statusAction, setStatusAction] = useState(null); // { tiket, targetStatus, title, message, isDanger }
+  const [statusAction, setStatusAction] = useState(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   // Delete Modal State
@@ -76,7 +78,6 @@ export const TiketPage = ({ onDataChange }) => {
   }, []);
 
   const handleOpenAdd = () => {
-    // Select first event that has remaining quota
     const availableEvent = events.find(e => ((e.kuota || 0) - (e.tiket_terjual || 0)) > 0) || events[0];
     const defaultBuyer = pembeliList[0];
 
@@ -92,10 +93,6 @@ export const TiketPage = ({ onDataChange }) => {
   const selectedEvent = useMemo(() => {
     return events.find(e => e.id === formData.event_id) || null;
   }, [events, formData.event_id]);
-
-  const selectedPembeli = useMemo(() => {
-    return pembeliList.find(p => (p.no_whatsapp || p.id) === formData.pembeli_id) || null;
-  }, [pembeliList, formData.pembeli_id]);
 
   const sisaKuotaSelected = useMemo(() => {
     if (!selectedEvent) return 0;
@@ -151,7 +148,7 @@ export const TiketPage = ({ onDataChange }) => {
         tiket,
         targetStatus: 'lunas',
         title: 'Konfirmasi Pembayaran Lunas',
-        message: `Konfirmasi pembayaran lunas untuk tiket ${tiket.nama_event} (${tiket.nama_pembeli}, ${tiket.jumlah_tiket} tiket - Total ${formatRupiah(tiket.total)})?`,
+        message: `Konfirmasi pembayaran lunas untuk tiket "${tiket.nama_event}" atas nama ${tiket.nama_pembeli} (${tiket.jumlah_tiket} tiket - Total ${formatRupiah(tiket.total)})?`,
         confirmLabel: 'Ya, Konfirmasi Lunas',
         isDanger: false
       });
@@ -159,8 +156,8 @@ export const TiketPage = ({ onDataChange }) => {
       setStatusAction({
         tiket,
         targetStatus: 'dibatalkan',
-        title: 'Batalkan Tiket',
-        message: `Apakah Anda yakin ingin membatalkan tiket ini? Kuota ${tiket.jumlah_tiket} tiket akan dikembalikan ke event.`,
+        title: 'Batalkan Tiket Pesanan',
+        message: `Apakah Anda yakin ingin membatalkan tiket ini? Kuota ${tiket.jumlah_tiket} kursi akan dikembalikan otomatis ke event.`,
         confirmLabel: 'Ya, Batalkan Tiket',
         isDanger: true
       });
@@ -168,9 +165,9 @@ export const TiketPage = ({ onDataChange }) => {
       setStatusAction({
         tiket,
         targetStatus: 'hadir',
-        title: 'Check-in Peserta (Hadir)',
-        message: `Konfirmasi kehadiran ${tiket.nama_pembeli} pada acara ${tiket.nama_event}?`,
-        confirmLabel: 'Check-in Sekarang',
+        title: 'Check-in Peserta di Lokasi Acara',
+        message: `Konfirmasi kedatangan ${tiket.nama_pembeli} pada acara "${tiket.nama_event}" (${tiket.jumlah_tiket} orang)?`,
+        confirmLabel: 'Tandai Hadir (Check-in)',
         isDanger: false
       });
     }
@@ -206,7 +203,6 @@ export const TiketPage = ({ onDataChange }) => {
     }
   };
 
-  // Filtered Tickets
   const filteredTickets = useMemo(() => {
     if (statusFilter === 'all') return tiketList;
     return tiketList.filter(t => t.status === statusFilter);
@@ -219,10 +215,10 @@ export const TiketPage = ({ onDataChange }) => {
 
   const getStatusBadge = (status) => {
     const map = {
-      menunggu_bayar: { label: 'Menunggu Bayar', class: 'menunggu_bayar' },
-      lunas: { label: 'Lunas', class: 'lunas' },
-      hadir: { label: 'Hadir (Check-in)', class: 'hadir' },
-      dibatalkan: { label: 'Dibatalkan', class: 'dibatalkan' }
+      menunggu_bayar: { label: '⏳ Menunggu Bayar', class: 'menunggu_bayar' },
+      lunas: { label: '💳 Lunas', class: 'lunas' },
+      hadir: { label: '🎟️ Hadir (Check-in)', class: 'hadir' },
+      dibatalkan: { label: '✕ Dibatalkan', class: 'dibatalkan' }
     };
     const info = map[status] || { label: status, class: '' };
     return <span className={`status-pill ${info.class}`}>{info.label}</span>;
@@ -232,8 +228,10 @@ export const TiketPage = ({ onDataChange }) => {
     <div>
       <div className="page-header">
         <div className="page-title-wrap">
-          <h1>Daftar Tiket</h1>
-          <p>Catat transaksi tiket, verifikasi pembayaran, dan lakukan check-in kehadiran.</p>
+          <h1>
+            <span>Daftar Tiket & Transaksi</span>
+          </h1>
+          <p>Catat pesanan tiket, validasi pembayaran transfer, dan proses check-in peserta acara.</p>
         </div>
         <button id="btn-tambah-tiket" type="button" className="btn btn-primary" onClick={handleOpenAdd}>
           <Plus size={18} />
@@ -248,7 +246,7 @@ export const TiketPage = ({ onDataChange }) => {
           className={`filter-tab-btn ${statusFilter === 'all' ? 'active' : ''}`}
           onClick={() => setStatusFilter('all')}
         >
-          Semua ({tiketList.length})
+          Semua Tiket ({tiketList.length})
         </button>
         <button
           type="button"
@@ -280,7 +278,7 @@ export const TiketPage = ({ onDataChange }) => {
         </button>
       </div>
 
-      {loading && <LoadingState message="Memuat daftar tiket..." />}
+      {loading && <LoadingState message="Memuat daftar transaksi tiket..." />}
 
       {!loading && error && (
         <ErrorState description={error} onRetry={fetchData} />
@@ -289,7 +287,7 @@ export const TiketPage = ({ onDataChange }) => {
       {!loading && !error && tiketList.length === 0 && (
         <EmptyState
           title="Belum Ada Tiket"
-          description="Belum ada transaksi pembelian tiket yang tercatat."
+          description="Belum ada transaksi pembelian tiket yang tercatat. Buat pesanan tiket pertamamu sekarang!"
           actionLabel="Buat Tiket Baru"
           onAction={handleOpenAdd}
         />
@@ -298,7 +296,7 @@ export const TiketPage = ({ onDataChange }) => {
       {!loading && !error && tiketList.length > 0 && filteredTickets.length === 0 && (
         <EmptyState
           title="Tiket Tidak Ditemukan"
-          description={`Tidak ada tiket dengan status filter "${statusFilter}".`}
+          description={`Tidak ada transaksi tiket dengan status "${statusFilter}".`}
           actionLabel="Tampilkan Semua Tiket"
           onAction={() => setStatusFilter('all')}
         />
@@ -308,112 +306,171 @@ export const TiketPage = ({ onDataChange }) => {
         <div className="card-grid">
           {filteredTickets.map((tiket) => {
             return (
-              <div key={tiket.id} className="card" id={`card-tiket-${tiket.id}`}>
-                <div className="card-header">
-                  <div>
-                    <h3 className="card-title" style={{ fontSize: '1.05rem' }}>{tiket.nama_event}</h3>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      ID Tiket: {tiket.id}
-                    </span>
-                  </div>
-                  {getStatusBadge(tiket.status)}
-                </div>
-
-                <div className="card-meta">
-                  <div className="card-meta-item">
-                    <User size={15} className="text-muted" />
-                    <span><strong>{tiket.nama_pembeli}</strong> ({tiket.pembeli_id})</span>
-                  </div>
-                  <div className="card-meta-item">
-                    <Calendar size={15} className="text-muted" />
-                    <span>Tanggal Event: {tiket.tanggal_event}</span>
-                  </div>
-                  <div className="card-meta-item">
-                    <Layers size={15} className="text-muted" />
-                    <span>Jumlah: <strong>{tiket.jumlah_tiket} tiket</strong> @ {formatRupiah(tiket.harga_tiket)}</span>
-                  </div>
-                  <div className="card-meta-item" style={{ marginTop: 4 }}>
-                    <DollarSign size={15} className="text-muted" />
-                    <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--primary)' }}>
-                      Total: {formatRupiah(tiket.total)}
-                    </span>
+              <div key={tiket.id} className="ticket-stub" id={`card-tiket-${tiket.id}`}>
+                <div className="ticket-stub-header">
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>
+                    <div>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        KARSA EVENT PASS
+                      </span>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-title)', marginTop: 2 }}>
+                        {tiket.nama_event}
+                      </h3>
+                    </div>
+                    {getStatusBadge(tiket.status)}
                   </div>
                 </div>
 
-                {/* Status Action Buttons */}
-                <div style={{
-                  padding: '10px',
-                  borderRadius: 'var(--radius-md)',
-                  background: 'var(--bg-main)',
-                  margin: '10px 0',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 6
-                }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                    Alur Status:
-                  </span>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <div className="ticket-stub-body">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        background: 'var(--primary-light)',
+                        color: 'var(--primary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 700,
+                        fontSize: '0.85rem'
+                      }}>
+                        <User size={16} />
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-title)' }}>
+                          {tiket.nama_pembeli}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                          {tiket.pembeli_id}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: 8,
+                      background: 'var(--bg-subtle)',
+                      padding: '10px 12px',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid var(--border-light)'
+                    }}>
+                      <div>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Tanggal Event</span>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-title)' }}>
+                          {tiket.tanggal_event}
+                        </div>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Kuantitas</span>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-title)' }}>
+                          {tiket.jumlah_tiket} Tiket
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 4 }}>
+                      <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Total Pembayaran</span>
+                      <span style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary)' }}>
+                        {formatRupiah(tiket.total)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Status Action Buttons */}
+                  <div style={{
+                    marginTop: 14,
+                    paddingTop: 12,
+                    borderTop: '1px solid var(--border-light)'
+                  }}>
                     {tiket.status === 'menunggu_bayar' && (
-                      <>
+                      <div style={{ display: 'flex', gap: 8 }}>
                         <button
                           type="button"
                           className="btn btn-success btn-sm"
-                          style={{ flex: 1, padding: '5px 10px', fontSize: '0.75rem' }}
+                          style={{ flex: 1 }}
                           onClick={() => handleTriggerStatusChange(tiket, 'lunas')}
                         >
-                          <CheckCircle size={14} />
-                          Konfirmasi Lunas
+                          <CheckCircle size={15} />
+                          <span>Konfirmasi Lunas</span>
                         </button>
                         <button
                           type="button"
                           className="btn btn-danger-outline btn-sm"
-                          style={{ padding: '5px 10px', fontSize: '0.75rem' }}
                           onClick={() => handleTriggerStatusChange(tiket, 'dibatalkan')}
+                          title="Batalkan Pesanan Tiket"
                         >
-                          <Ban size={14} />
-                          Batalkan
+                          <Ban size={15} />
+                          <span>Batalkan</span>
                         </button>
-                      </>
+                      </div>
                     )}
 
                     {tiket.status === 'lunas' && (
                       <button
                         type="button"
                         className="btn btn-primary btn-sm"
-                        style={{ width: '100%', padding: '6px 12px', fontSize: '0.8rem' }}
+                        style={{ width: '100%' }}
                         onClick={() => handleTriggerStatusChange(tiket, 'hadir')}
                       >
-                        <UserCheck size={15} />
-                        Check-in (Tandai Hadir)
+                        <UserCheck size={16} />
+                        <span>Check-in (Tandai Hadir di Acara)</span>
                       </button>
                     )}
 
                     {tiket.status === 'hadir' && (
-                      <span style={{ fontSize: '0.8rem', color: 'var(--success-text)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <CheckCircle size={15} /> Peserta Sudah Check-in di Lokasi
-                      </span>
+                      <div style={{
+                        padding: '8px 12px',
+                        borderRadius: 'var(--radius-md)',
+                        background: '#ecfdf5',
+                        color: '#065f46',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6
+                      }}>
+                        <CheckCircle size={16} />
+                        <span>Peserta Sudah Check-in di Venue</span>
+                      </div>
                     )}
 
                     {tiket.status === 'dibatalkan' && (
-                      <span style={{ fontSize: '0.8rem', color: 'var(--danger-text)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <Ban size={15} /> Pembelian Dibatalkan (Kuota Dikembalikan)
-                      </span>
+                      <div style={{
+                        padding: '8px 12px',
+                        borderRadius: 'var(--radius-md)',
+                        background: '#fef2f2',
+                        color: '#991b1b',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6
+                      }}>
+                        <Ban size={16} />
+                        <span>Pembelian Dibatalkan (Kuota Kembali)</span>
+                      </div>
                     )}
                   </div>
                 </div>
 
-                <div className="card-footer">
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-                    {tiket.dibuat_pada ? new Date(tiket.dibuat_pada).toLocaleDateString('id-ID') : 'Baru saja'}
-                  </span>
+                <div className="ticket-stub-footer">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <QrCode size={16} color="var(--text-muted)" />
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-subtle)', fontFamily: 'monospace' }}>
+                      #{tiket.id}
+                    </span>
+                  </div>
                   <button
                     type="button"
                     className="btn btn-danger-outline btn-sm"
+                    style={{ padding: '4px 10px', fontSize: '0.75rem' }}
                     onClick={() => setDeleteTarget(tiket)}
                     title="Hapus Tiket"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={13} />
                     <span>Hapus</span>
                   </button>
                 </div>
@@ -444,7 +501,7 @@ export const TiketPage = ({ onDataChange }) => {
                 {/* Event Select */}
                 <div className="form-group">
                   <label className="form-label">
-                    Pilih Acara / Event <span className="hint">Pilih dari daftar</span>
+                    Pilih Acara / Event <span className="hint">Pilih dari jadwal</span>
                   </label>
                   {events.length === 0 ? (
                     <div style={{ color: 'var(--danger)', fontSize: '0.85rem' }}>
@@ -456,12 +513,12 @@ export const TiketPage = ({ onDataChange }) => {
                       value={formData.event_id}
                       onChange={(e) => setFormData({ ...formData, event_id: e.target.value })}
                     >
-                      <option value="">-- Pilih Event --</option>
+                      <option value="">-- Pilih Event Acara --</option>
                       {events.map((ev) => {
                         const sisa = (ev.kuota || 0) - (ev.tiket_terjual || 0);
                         return (
                           <option key={ev.id} value={ev.id} disabled={sisa <= 0}>
-                            {ev.nama} ({ev.tanggal}) - {formatRupiah(ev.harga_tiket)} [Sisa: {sisa} kursi] {sisa <= 0 ? '(HABIS)' : ''}
+                            {ev.nama} ({ev.tanggal}) • {formatRupiah(ev.harga_tiket)} [Sisa: {sisa} kursi] {sisa <= 0 ? '(HABIS)' : ''}
                           </option>
                         );
                       })}
@@ -473,7 +530,7 @@ export const TiketPage = ({ onDataChange }) => {
                 {/* Pembeli Select */}
                 <div className="form-group">
                   <label className="form-label">
-                    Pilih Pembeli <span className="hint">Berdasarkan nama & WhatsApp</span>
+                    Pilih Kontak Pembeli <span className="hint">Nama & WhatsApp</span>
                   </label>
                   {pembeliList.length === 0 ? (
                     <div style={{ color: 'var(--danger)', fontSize: '0.85rem' }}>
@@ -485,7 +542,7 @@ export const TiketPage = ({ onDataChange }) => {
                       value={formData.pembeli_id}
                       onChange={(e) => setFormData({ ...formData, pembeli_id: e.target.value })}
                     >
-                      <option value="">-- Pilih Pembeli --</option>
+                      <option value="">-- Pilih Pembeli Terdaftar --</option>
                       {pembeliList.map((p) => {
                         const phone = p.no_whatsapp || p.id;
                         return (
@@ -502,7 +559,7 @@ export const TiketPage = ({ onDataChange }) => {
                 {/* Jumlah Tiket */}
                 <div className="form-group">
                   <label className="form-label">
-                    Jumlah Tiket <span className="hint">1 sampai 5 (Maks. sisa kuota)</span>
+                    Jumlah Tiket <span className="hint">1 sampai 5 tiket</span>
                   </label>
                   <input
                     type="number"
@@ -518,37 +575,38 @@ export const TiketPage = ({ onDataChange }) => {
                   </span>
                 </div>
 
-                {/* Ringkasan Total Otomatis */}
+                {/* Live Order Summary Box */}
                 <div style={{
-                  padding: 14,
-                  borderRadius: 'var(--radius-md)',
-                  background: 'var(--primary-light)',
+                  padding: 16,
+                  borderRadius: 'var(--radius-lg)',
+                  background: 'linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%)',
                   border: '1px solid #c7d2fe',
-                  marginTop: 10
+                  marginTop: 12
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-body)' }}>
                     <span>Harga Satuan:</span>
                     <strong>{formatRupiah(selectedEvent ? selectedEvent.harga_tiket : 0)}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: 4 }}>
-                    <span>Jumlah:</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-body)', marginTop: 4 }}>
+                    <span>Jumlah Tiket:</span>
                     <strong>{formData.jumlah_tiket} tiket</strong>
                   </div>
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    fontSize: '1.05rem',
+                    alignItems: 'center',
+                    fontSize: '1.1rem',
                     fontWeight: 800,
                     color: 'var(--primary)',
                     borderTop: '1px dashed #a5b4fc',
-                    paddingTop: 8,
-                    marginTop: 8
+                    paddingTop: 10,
+                    marginTop: 10
                   }}>
                     <span>Total Pembayaran:</span>
-                    <span>{formatRupiah(calculatedTotal)}</span>
+                    <span style={{ fontSize: '1.25rem' }}>{formatRupiah(calculatedTotal)}</span>
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 6 }}>
-                    * Status awal tiket otomatis <strong>menunggu_bayar</strong>. Kuota event langsung dipotong saat dibuat.
+                    * Tiket baru otomatis diawali dengan status <strong>menunggu_bayar</strong>.
                   </div>
                 </div>
               </div>
@@ -568,7 +626,7 @@ export const TiketPage = ({ onDataChange }) => {
                   disabled={isSubmitting || events.length === 0 || pembeliList.length === 0}
                 >
                   <Check size={16} />
-                  <span>{isSubmitting ? 'Menyimpan...' : 'Simpan Tiket'}</span>
+                  <span>{isSubmitting ? 'Menyimpan...' : 'Simpan Transaksi Tiket'}</span>
                 </button>
               </div>
             </form>
@@ -596,7 +654,7 @@ export const TiketPage = ({ onDataChange }) => {
         isOpen={!!deleteTarget}
         title="Hapus Transaksi Tiket"
         message={`Apakah Anda yakin ingin menghapus data tiket untuk "${deleteTarget?.nama_pembeli}" pada event "${deleteTarget?.nama_event}"?`}
-        confirmLabel="Hapus Tiket"
+        confirmLabel="Ya, Hapus Tiket"
         cancelLabel="Batal"
         isLoading={isDeleting}
         onConfirm={handleDeleteConfirm}

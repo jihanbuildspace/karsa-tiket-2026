@@ -10,6 +10,7 @@ import { RulesTestModal } from './components/RulesTestModal';
 import { eventService } from './services/eventService';
 import { pembeliService } from './services/pembeliService';
 import { tiketService } from './services/tiketService';
+import { Sparkles, Calendar, Users, Ticket, ShieldCheck, Settings } from 'lucide-react';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('event');
@@ -52,6 +53,28 @@ function AppContent() {
       />
 
       <main className="main-content">
+        {/* Dynamic Hero Banner */}
+        <div className="hero-banner">
+          <div className="hero-content">
+            <h2>✨ Karsa Tiket Dashboard</h2>
+            <p>Kelola event, transaksi tiket, dan pantau kehadiran komunitas secara real-time.</p>
+          </div>
+          <div className="hero-stats">
+            <div className="hero-stat-pill">
+              <Calendar size={15} />
+              <span>{eventCount} Event</span>
+            </div>
+            <div className="hero-stat-pill">
+              <Users size={15} />
+              <span>{pembeliCount} Kontak</span>
+            </div>
+            <div className="hero-stat-pill">
+              <Ticket size={15} />
+              <span>{tiketCount} Tiket</span>
+            </div>
+          </div>
+        </div>
+
         {activeTab === 'event' && (
           <EventPage onDataChange={(count) => { setEventCount(count); refreshCounts(); }} />
         )}
@@ -66,21 +89,21 @@ function AppContent() {
         )}
       </main>
 
-      {/* Floating Bottom Quick Bar for Security Rules Test & Config */}
+      {/* Floating Bottom Quick Bar */}
       <div style={{
         position: 'fixed',
-        bottom: 16,
+        bottom: 20,
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 30,
         display: 'flex',
         gap: 8,
-        background: 'rgba(15, 23, 42, 0.85)',
-        backdropFilter: 'blur(10px)',
-        padding: '6px 12px',
+        background: 'rgba(15, 23, 42, 0.88)',
+        backdropFilter: 'blur(12px)',
+        padding: '8px 16px',
         borderRadius: 'var(--radius-full)',
-        boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-        border: '1px solid rgba(255,255,255,0.1)'
+        boxShadow: '0 12px 30px rgba(0,0,0,0.25)',
+        border: '1px solid rgba(255,255,255,0.15)'
       }}>
         <button
           type="button"
@@ -89,16 +112,17 @@ function AppContent() {
             background: 'none',
             border: 'none',
             color: '#a5b4fc',
-            fontSize: '0.78rem',
-            fontWeight: 600,
+            fontSize: '0.82rem',
+            fontWeight: 700,
             cursor: 'pointer',
-            padding: '4px 8px',
+            padding: '4px 10px',
             display: 'flex',
             alignItems: 'center',
-            gap: 5
+            gap: 6
           }}
         >
-          🛡️ Lembar Uji Mandiri Rules
+          <ShieldCheck size={16} />
+          <span>Lembar Uji Rules</span>
         </button>
         <span style={{ color: 'rgba(255,255,255,0.2)', alignSelf: 'center' }}>|</span>
         <button
@@ -108,16 +132,17 @@ function AppContent() {
             background: 'none',
             border: 'none',
             color: '#93c5fd',
-            fontSize: '0.78rem',
-            fontWeight: 600,
+            fontSize: '0.82rem',
+            fontWeight: 700,
             cursor: 'pointer',
-            padding: '4px 8px',
+            padding: '4px 10px',
             display: 'flex',
             alignItems: 'center',
-            gap: 5
+            gap: 6
           }}
         >
-          ⚙️ Atur Firebase / Demo
+          <Settings size={16} />
+          <span>Atur Database</span>
         </button>
       </div>
 
